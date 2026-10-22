@@ -54,6 +54,16 @@ public class BossBar {
         updateBossBar();
     }
 
+    /**
+     * Removes the boss bar and sends it again, together with the entity it is attached to.
+     * The Bedrock client discards every entity when it changes dimension, including that entity,
+     * so just sending the boss bar again would not show it.
+     */
+    public void resendBossBar() {
+        removeBossBar();
+        addBossBar();
+    }
+
     //TODO: There is a player unique entity ID - if this didn't exist before, we may be able to get rid of our hack
 
     public void updateBossBar() {

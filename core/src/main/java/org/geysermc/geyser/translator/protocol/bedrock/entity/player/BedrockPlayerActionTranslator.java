@@ -37,6 +37,8 @@ import org.geysermc.geyser.translator.protocol.Translator;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerState;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.player.ServerboundPlayerCommandPacket;
 
+import java.util.concurrent.TimeUnit;
+
 @Translator(packet = PlayerActionPacket.class)
 public class BedrockPlayerActionTranslator extends PacketTranslator<PlayerActionPacket> {
 
@@ -61,8 +63,13 @@ public class BedrockPlayerActionTranslator extends PacketTranslator<PlayerAction
                 // Bounding box must be sent after a player dies and respawns since 1.19.40
                 entity.updateBoundingBox();
 
-                // Needed here since 1.19.81 for dimension switching
-                session.getEntityCache().updateBossBars();
+                // Needed here since 1.19.81 for dimension switching.
+                // The client has dropped the entities the boss bars are attached to by now, so those are sent again too
+                session.getEntityCache().resendBossBars();
+                // When changing between two dimensions that look the same to Bedrock, the client can still be settling into
+                // the new one at this point and loses the boss bars again, so send them again a bit later as well
+                session.scheduleInEventLoop(() -> session.getEntityCache().resendBossBars(), 3, TimeUnit.SECONDS);
+                session.scheduleInEventLoop(() -> session.getEntityCache().resendBossBars(), 7, TimeUnit.SECONDS);
             }
             case STOP_SLEEP -> {
                 ServerboundPlayerCommandPacket stopSleepingPacket = new ServerboundPlayerCommandPacket(session.getPlayerEntity().getEntityId(), PlayerState.LEAVE_BED);

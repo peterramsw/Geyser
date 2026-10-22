@@ -375,6 +375,14 @@ public class EntityCache {
         bossBars.values().forEach(BossBar::updateBossBar);
     }
 
+    /**
+     * Sends all boss bars again together with their entities. Use this once the client has finished
+     * loading a new dimension, as it discards the entities the boss bars are attached to.
+     */
+    public void resendBossBars() {
+        bossBars.values().forEach(BossBar::resendBossBar);
+    }
+
     public void removeAllBossBars() {
         bossBars.values().forEach(BossBar::removeBossBar);
         bossBars.clear();
